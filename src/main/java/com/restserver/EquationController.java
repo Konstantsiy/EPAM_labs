@@ -7,11 +7,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class EquationController {
     @RequestMapping("/equation")
-    public ServerResponse EquationSolution(@RequestParam("firstSlog") double firstSlog,
+    public ServerResponse processEquation(@RequestParam("firstSlog") double firstSlog,
                                          @RequestParam("sum") double resultSum,
-                                         @RequestParam("borderFrom") double min,
+                                         @RequestParam("rangeFrom") double min,
                                          @RequestParam("to") double max){
-        ServerResponse response = new ServerResponse(firstSlog, resultSum, min, max);
+        EquationService equation = new EquationService(firstSlog, resultSum, min, max);
+        ServerResponse response = new ServerResponse();
+        response.setEquationRoot(equation.getEquationRoot());
+        response.setComment(equation.getComment());
         return response;
     }
 }

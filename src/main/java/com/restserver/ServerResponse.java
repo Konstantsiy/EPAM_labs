@@ -1,37 +1,29 @@
 package com.restserver;
 
 public class ServerResponse {
-    private final double firstSlogan;
-    private final double resultSum;
-    private final double leftBorder;
-    private final double rightBorder;
-    private final double equationRoot;
+    private double equationRoot;
+    private String comment;
 
-    public ServerResponse(double number, double sum, double min, double max) {
-        this.firstSlogan = number;
-        this.resultSum = sum;
-        this.leftBorder = min;
-        this.rightBorder = max;
-        this.equationRoot = sum - number;
+    public ServerResponse() {};
+
+    public ServerResponse(double root, String comment) {
+        this.equationRoot = root;
+        this.comment = comment;
+    };
+
+    public void setEquationRoot(double equationRoot) {
+        this.equationRoot = equationRoot;
     }
 
-    public double getResultSum() {
-        return resultSum;
-    }
-
-    public double getFirstSlogan() {
-        return firstSlogan;
-    }
-
-    public double getLeftBorder() {
-        return leftBorder;
-    }
-
-    public double getRightBorder() {
-        return rightBorder;
+    public void setComment(String comment) {
+        this.comment = comment;
     }
 
     public double getEquationRoot() {
         return equationRoot;
+    }
+
+    public String getComment() {
+        return comment;
     }
 }
