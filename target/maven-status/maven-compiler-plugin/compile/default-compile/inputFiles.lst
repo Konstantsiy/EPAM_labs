@@ -1,0 +1,8 @@
+/home/kostyanislv/Java/Projects/LocalRestServer/src/main/java/com/restserver/EquationController.java
+/home/kostyanislv/Java/Projects/LocalRestServer/src/main/java/com/restserver/Equation.java
+/home/kostyanislv/Java/Projects/LocalRestServer/src/main/java/com/restserver/EquationBody.java
+/home/kostyanislv/Java/Projects/LocalRestServer/src/main/java/com/restserver/ServiceResponse.java
+/home/kostyanislv/Java/Projects/LocalRestServer/src/main/java/Exceptions/InternalServiceException.java
+/home/kostyanislv/Java/Projects/LocalRestServer/src/main/java/com/restserver/ServiceError.java
+/home/kostyanislv/Java/Projects/LocalRestServer/src/main/java/com/restserver/GlobalExceptionHandler.java
+/home/kostyanislv/Java/Projects/LocalRestServer/src/main/java/Exceptions/BadRequestException.java
