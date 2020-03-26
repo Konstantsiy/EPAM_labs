@@ -8,7 +8,7 @@ public class BadRequestException extends Exception{
     private int exceptionCode;
     private String errorMessage;
 
-    BadRequestException(int exceptionCode, String message){
+    public BadRequestException(int exceptionCode, String message){
         //super(message);
         this.errorMessage = message;
         this.exceptionCode = exceptionCode;
