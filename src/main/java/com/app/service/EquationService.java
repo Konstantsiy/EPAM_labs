@@ -15,7 +15,6 @@ public class EquationService {
     Logger logger = LoggerFactory.getLogger(this.getClass());
     HashMap<EquationBody, ServiceResponse> equations = new HashMap<>();
 
-    //@Autowired
     public EquationService(){}
 
     public Map<EquationBody, ServiceResponse> getAll() {
