@@ -45,7 +45,7 @@ public class MainController {
     }
 
     @DeleteMapping(value = "/cache/delete")
-    public Map<EquationBody, ServiceResponse> deleteEquation(@RequestParam("firstSlog") Double firstSlogan,
+    public void deleteEquation(@RequestParam("firstSlog") Double firstSlogan,
                                @RequestParam("sum") Double sum,
                                @RequestParam("rangeFrom") Double min,
                                @RequestParam("max") Double max) throws BadRequestException, InternalServiceException {
@@ -58,13 +58,11 @@ public class MainController {
         else {
             logger.error("No such request in cache");
         }
-        return this.equationService.getAll();
     }
 
     @DeleteMapping(value = "/cache/deleteAll")
-    public Map<EquationBody, ServiceResponse> deleteAllEquations() {
+    public void deleteAllEquations() {
         this.equationService.deleteAll();
         logger.info("The cache is cleared");
-        return this.equationService.getAll();
     }
 }
