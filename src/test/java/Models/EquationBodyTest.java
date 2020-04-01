@@ -1,10 +1,11 @@
-package com.restserver;
+package Models;
 
+import com.app.models.EquationBody;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.event.annotation.AfterTestClass;
 import org.springframework.test.context.event.annotation.BeforeTestClass;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class EquationBodyTest {
 
@@ -21,8 +22,8 @@ class EquationBodyTest {
     @Test
     public void verification() {
         EquationBody equationBody = new EquationBody(2, 12, -10, 30);
-        assertEquals(true, equationBody.verification());
+        assertEquals(true, equationBody.calculationVerification());
         equationBody.setAllParams(30, 10, 0, 40);
-        assertEquals(false, equationBody.verification());
+        assertEquals(false, equationBody.calculationVerification());
     }
 }

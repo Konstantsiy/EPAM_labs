@@ -1,4 +1,4 @@
-package com.restserver;
+package com.app.models;
 
 import org.springframework.http.HttpStatus;
 
@@ -7,7 +7,7 @@ public class ServiceError {
     private HttpStatus status;
     private String message;
 
-    ServiceError(int errorCode, HttpStatus status, String message) {
+    public ServiceError(int errorCode, HttpStatus status, String message) {
         this.errorCode = errorCode;
         this.status = status;
         this.message = message;

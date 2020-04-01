@@ -1,4 +1,4 @@
-package com.restserver;
+package com.app.models;
 
 public class ServiceResponse {
     private double equationRoot;

@@ -1,7 +1,6 @@
-package com.restserver;
+package com.app.exceptions;
 
-import Exceptions.BadRequestException;
-import Exceptions.InternalServiceException;
+import com.app.models.ServiceError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
