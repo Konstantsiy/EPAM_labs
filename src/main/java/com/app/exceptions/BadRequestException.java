@@ -15,8 +15,4 @@ public class BadRequestException extends Exception{
     public int getExceptionCode() {
         return exceptionCode;
     }
-
-    public String getErrorMessage() {
-        return errorMessage;
-    }
 }
