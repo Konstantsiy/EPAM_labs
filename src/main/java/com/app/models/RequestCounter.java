@@ -25,7 +25,6 @@ public class RequestCounter {
             Thread.sleep(50);
 
         } catch (InterruptedException e) {
-            //System.out.println(e.getMessage());
             throw new InternalServiceException(500, e.getMessage());
         } finally {
             this.semaphore.release();

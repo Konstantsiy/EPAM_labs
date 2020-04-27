@@ -1,14 +1,12 @@
 package com.app.controller;
 
-import com.app.exceptions.BadRequestException;
 import com.app.exceptions.InternalServiceException;
-import com.app.models.RequestCounter;
-import com.app.models.Equation;
-import com.app.models.ServiceResponse;
+import com.app.models.*;
 import com.app.services.CacheService;
 import com.app.services.EquationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 
@@ -24,46 +22,59 @@ public class MainController {
     EquationService equationService = new EquationService();
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping
-    public ServiceResponse processEquation(@RequestParam("firstSlog") Double firstSlog,
-                                           @RequestParam("sum") Double resultSum,
-                                           @RequestParam("rangeFrom") Double min,
-                                           @RequestParam("to") Double max) throws InternalServiceException, BadRequestException {
-        Equation equation = new Equation(firstSlog, resultSum, min, max);
+    @GetMapping(value = "/getEquationRoot", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ServiceResponse getEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
-        logger.info("Verification was successful");
         this.requestCounter.increaseNumberOfRequests();
-        return this.cacheService.getResponse(equation);
+        return this.cacheService.getCache().entrySet().stream()
+                .filter(entry ->  entry.getValue().getEquationRoot() == equation.getEquationRoot())
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElseGet(() -> this.cacheService.add(equation));
     }
 
-    @GetMapping(value = "/cache")
+    @PostMapping(value = "/postEquationList")
+    public void postEquationList(@RequestBody EquationListWrapper equationList)  {
+        // save requests in the cache if they were not there
+        equationList.getEquations().stream()
+                .forEach(equation -> {
+                    this.equationService.globalVerification(equation);
+                    if(this.cacheService.getCache().containsKey(equation) == false) {
+                        this.cacheService.add(equation);
+                    }
+                });
+    }
+
+    @GetMapping(value = "/cache", produces = MediaType.APPLICATION_JSON_VALUE)
     public Map<Equation, ServiceResponse> getCache() throws InternalServiceException {
         this.requestCounter.increaseNumberOfRequests();
         logger.info("Get all requests");
-        return this.cacheService.getAll();
+        return this.cacheService.getCache();
     }
 
     @DeleteMapping(value = "/cache/delete")
-    public void deleteEquation(@RequestParam("firstSlog") Double firstSlogan,
-                               @RequestParam("sum") Double sum,
-                               @RequestParam("rangeFrom") Double min,
-                               @RequestParam("max") Double max) throws BadRequestException, InternalServiceException {
-        Equation equation = new Equation(firstSlogan, sum, min, max);
+    public void deleteEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
         this.requestCounter.increaseNumberOfRequests();
-        if(this.cacheService.find(equation)) {
-            this.cacheService.delete(equation);
-            logger.info("Request removed from cache");
-        }
-        else {
-            logger.error("No such request in cache");
-        }
+
+        this.cacheService.getCache().entrySet().stream()
+                .filter(entry -> entry.getKey() == equation)
+                .findFirst()
+                .filter(entry -> {
+                    logger.info("Request removed from cache");
+                    this.cacheService.getCache().remove(entry.getKey());
+                    return true;
+                })
+                .orElseGet(() -> {
+                    logger.error("No such request in cache");
+                    return null;
+                });
     }
 
     @DeleteMapping(value = "/cache/deleteAll")
     public void deleteAllEquations() throws InternalServiceException {
         this.requestCounter.increaseNumberOfRequests();
-        this.cacheService.deleteAll();
+        this.cacheService.getCache().clear();
         logger.info("The cache is cleared");
     }
 

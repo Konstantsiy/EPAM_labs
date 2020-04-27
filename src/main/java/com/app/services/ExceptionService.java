@@ -1,5 +1,7 @@
-package com.app.exceptions;
+package com.app.services;
 
+import com.app.exceptions.BadRequestException;
+import com.app.exceptions.InternalServiceException;
 import com.app.models.ServiceError;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,7 +9,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
-public class GlobalExceptionHandler {
+public class ExceptionService {
 
     @ExceptionHandler({RuntimeException.class, BadRequestException.class, InternalServiceException.class})
     public final ResponseEntity<ServiceError> handleException(Exception ex) {
