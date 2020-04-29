@@ -41,7 +41,7 @@ public class MainController {
         equationList.getEquations().stream().forEach(equation -> this.equationService.globalVerification(equation));
         // save requests in the cache if they were not there
         equationList.getEquations().stream().forEach(equation -> {
-            if(this.cacheService.find(equation) == false) {
+            if(!this.cacheService.find(equation)) {
                 responseList.add(this.cacheService.add(equation));
             }
         });
