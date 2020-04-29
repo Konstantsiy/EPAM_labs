@@ -28,6 +28,9 @@ public class EquationService {
             System.out.println(e.getExceptionCode() + ":" +  e.getMessage());
         }
         logger.info("Verification was successful");
-        equation.setEquationRoot(equation.getSum() - equation.getFirstSlogan());
+    }
+
+    public double calculateEquationRoot(Equation equation) {
+        return equation.getSum() - equation.getFirstSlogan();
     }
 }

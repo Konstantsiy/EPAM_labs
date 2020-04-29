@@ -6,10 +6,10 @@ import com.app.services.CacheService;
 import com.app.services.EquationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
@@ -22,30 +22,33 @@ public class MainController {
     EquationService equationService = new EquationService();
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping(value = "/getEquationRoot", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/getEquationRoot1")
     public ServiceResponse getEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
         this.requestCounter.increaseNumberOfRequests();
+        // return found or new response
         return this.cacheService.getCache().entrySet().stream()
-                .filter(entry ->  entry.getValue().getEquationRoot() == equation.getEquationRoot())
+                .filter(entry ->  equation.equals(entry.getKey())) // check needed request in cache
                 .findFirst()
                 .map(Map.Entry::getValue)
-                .orElseGet(() -> this.cacheService.add(equation));
+                .orElseGet(() -> this.cacheService.add(equation)); // calculates, adds to the cache and returns the result
     }
 
     @PostMapping(value = "/postEquationList")
-    public void postEquationList(@RequestBody EquationListWrapper equationList)  {
+    public ArrayList<ServiceResponse> postEquationList(@RequestBody EquationListWrapper equationList)  {
+        ArrayList<ServiceResponse> responseList = new ArrayList<ServiceResponse>();
+        // check equation list
+        equationList.getEquations().stream().forEach(equation -> this.equationService.globalVerification(equation));
         // save requests in the cache if they were not there
-        equationList.getEquations().stream()
-                .forEach(equation -> {
-                    this.equationService.globalVerification(equation);
-                    if(this.cacheService.getCache().containsKey(equation) == false) {
-                        this.cacheService.add(equation);
-                    }
-                });
+        equationList.getEquations().stream().forEach(equation -> {
+            if(this.cacheService.find(equation) == false) {
+                responseList.add(this.cacheService.add(equation));
+            }
+        });
+        return responseList;
     }
 
-    @GetMapping(value = "/cache", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/cache")
     public Map<Equation, ServiceResponse> getCache() throws InternalServiceException {
         this.requestCounter.increaseNumberOfRequests();
         logger.info("Get all requests");
@@ -56,9 +59,8 @@ public class MainController {
     public void deleteEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
         this.requestCounter.increaseNumberOfRequests();
-
         this.cacheService.getCache().entrySet().stream()
-                .filter(entry -> entry.getKey() == equation)
+                .filter(entry -> entry.getKey().equals(equation))
                 .findFirst()
                 .filter(entry -> {
                     logger.info("Request removed from cache");
