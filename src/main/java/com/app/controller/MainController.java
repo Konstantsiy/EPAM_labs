@@ -22,7 +22,7 @@ public class MainController {
     EquationService equationService = new EquationService();
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping(value = "/getEquationRoot1")
+    @GetMapping(value = "/getEquationRoot")
     public ServiceResponse getEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
         this.requestCounter.increaseNumberOfRequests();
@@ -42,6 +42,7 @@ public class MainController {
         // save requests in the cache if they were not there
         equationList.getEquations().stream().forEach(equation -> {
             if(!this.cacheService.find(equation)) {
+                // add in response those that were not in the cache
                 responseList.add(this.cacheService.add(equation));
             }
         });
