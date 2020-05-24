@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Semaphore;
 
@@ -23,57 +22,30 @@ public class MainController {
     EquationService equationService = new EquationService();
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping(value = "/getEquationRoot")
+    @GetMapping(value = "/getEquationRoot1")
     public ServiceResponse getEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
         this.requestCounter.increaseNumberOfRequests();
-        return this.cacheService
-                   .getCache()
-                   .entrySet()
-                   .stream()
-                   .filter(entry ->  equation.equals(entry.getKey())) // check needed request in cache
-                   .findFirst()
-                   .map(Map.Entry::getValue)
-                   .orElseGet(() -> {
-                       ServiceResponse response = new ServiceResponse();
-                       response.setEquationRoot(this.equationService.calculateEquationRoot(equation));
-                       this.cacheService.add(equation, response);
-                       return response;
-                   });
+        // return found or new response
+        return this.cacheService.getCache().entrySet().stream()
+                .filter(entry ->  equation.equals(entry.getKey())) // check needed request in cache
+                .findFirst()
+                .map(Map.Entry::getValue)
+                .orElseGet(() -> this.cacheService.add(equation)); // calculates, adds to the cache and returns the result
     }
 
     @PostMapping(value = "/postEquationList")
-    public Statistics postEquationList(@RequestBody EquationListWrapper equationList)  {
-        Statistics statistics = new Statistics(equationList.getEquations().size());
-        ArrayList<ServiceResponse> responses = new ArrayList<>();
-        equationList.getEquations()
-                    .stream()
-                    .forEach(equation -> {
-                        if(this.equationService.globalVerification(equation)) {
-                            statistics.incValid();
-                        }
-
-                        ServiceResponse response = new ServiceResponse();
-                        response.setEquationRoot(this.equationService.calculateEquationRoot(equation));
-                        statistics.compare(response.getEquationRoot());
-                        responses.add(response);
-
-                        if(!this.cacheService.find(equation)) {
-                            statistics.incUnique();
-                            this.cacheService.add(equation, response);
-                        }
-                    });
-        int mostPopularFreq = 0;
-        double mostPopularResponse = 0;
-        for(ServiceResponse response : responses) {
-            int responseFreq = Collections.frequency(responses, response);
-            if(responseFreq > mostPopularFreq) {
-                mostPopularFreq = responseFreq;
-                mostPopularResponse = response.getEquationRoot();
+    public ArrayList<ServiceResponse> postEquationList(@RequestBody EquationListWrapper equationList)  {
+        ArrayList<ServiceResponse> responseList = new ArrayList<ServiceResponse>();
+        // check equation list
+        equationList.getEquations().stream().forEach(equation -> this.equationService.globalVerification(equation));
+        // save requests in the cache if they were not there
+        equationList.getEquations().stream().forEach(equation -> {
+            if(this.cacheService.find(equation) == false) {
+                responseList.add(this.cacheService.add(equation));
             }
-        }
-        statistics.setMostPopular(mostPopularResponse);
-        return statistics;
+        });
+        return responseList;
     }
 
     @GetMapping(value = "/cache")
