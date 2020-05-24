@@ -5,7 +5,6 @@ public class ServiceResponse {
 
     public ServiceResponse() {};
 
-
     public ServiceResponse(double root) {
         this.equationRoot = root;
     };

@@ -10,7 +10,7 @@ public class EquationService {
 
     private Logger logger = LoggerFactory.getLogger(EquationService.class);
 
-    public void globalVerification(Equation equation) {
+    public boolean globalVerification(Equation equation) {
         try {
             if(equation.getFirstSlogan() == null || equation.getSum() == null || equation.getMin() == null || equation.getMax() == null) {
                 throw new BadRequestException(400, "All parameters are required");
@@ -23,11 +23,14 @@ public class EquationService {
         } catch (BadRequestException e) {
             logger.error("Incorrect parameters entered.");
             System.out.println(e.getExceptionCode() + ":" +  e.getMessage());
+            return false;
         } catch (InternalServiceException e) {
             logger.error("Unsuitable conditions for calculations");
             System.out.println(e.getExceptionCode() + ":" +  e.getMessage());
+            return false;
         }
         logger.info("Verification was successful");
+        return true;
     }
 
     public double calculateEquationRoot(Equation equation) {

@@ -9,8 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.*;
 
 
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
 @RestController
@@ -22,30 +21,57 @@ public class MainController {
     EquationService equationService = new EquationService();
     Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    @GetMapping(value = "/getEquationRoot1")
+    @GetMapping(value = "/getEquationRoot")
     public ServiceResponse getEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
         this.requestCounter.increaseNumberOfRequests();
-        // return found or new response
-        return this.cacheService.getCache().entrySet().stream()
-                .filter(entry ->  equation.equals(entry.getKey())) // check needed request in cache
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElseGet(() -> this.cacheService.add(equation)); // calculates, adds to the cache and returns the result
+        return this.cacheService
+                   .getCache()
+                   .entrySet()
+                   .stream()
+                   .filter(entry ->  equation.equals(entry.getKey())) // check needed request in cache
+                   .findFirst()
+                   .map(Map.Entry::getValue)
+                   .orElseGet(() -> {
+                       ServiceResponse response = new ServiceResponse();
+                       response.setEquationRoot(this.equationService.calculateEquationRoot(equation));
+                       this.cacheService.add(equation, response);
+                       return response;
+                   });
     }
 
     @PostMapping(value = "/postEquationList")
-    public ArrayList<ServiceResponse> postEquationList(@RequestBody EquationListWrapper equationList)  {
-        ArrayList<ServiceResponse> responseList = new ArrayList<ServiceResponse>();
-        // check equation list
-        equationList.getEquations().stream().forEach(equation -> this.equationService.globalVerification(equation));
-        // save requests in the cache if they were not there
-        equationList.getEquations().stream().forEach(equation -> {
-            if(this.cacheService.find(equation) == false) {
-                responseList.add(this.cacheService.add(equation));
+    public Statistics postEquationList(@RequestBody EquationListWrapper equationList)  {
+        Statistics statistics = new Statistics(equationList.getEquations().size());
+        ArrayList<ServiceResponse> responses = new ArrayList<>();
+        equationList.getEquations()
+                    .stream()
+                    .forEach(equation -> {
+                        if(this.equationService.globalVerification(equation)) {
+                            statistics.incValid();
+                        }
+
+                        ServiceResponse response = new ServiceResponse();
+                        response.setEquationRoot(this.equationService.calculateEquationRoot(equation));
+                        statistics.compare(response.getEquationRoot());
+                        responses.add(response);
+
+                        if(!this.cacheService.find(equation)) {
+                            statistics.incUnique();
+                            this.cacheService.add(equation, response);
+                        }
+                    });
+        int mostPopularFreq = 0;
+        double mostPopularResponse = 0;
+        for(ServiceResponse response : responses) {
+            int responseFreq = Collections.frequency(responses, response);
+            if(responseFreq > mostPopularFreq) {
+                mostPopularFreq = responseFreq;
+                mostPopularResponse = response.getEquationRoot();
             }
-        });
-        return responseList;
+        }
+        statistics.setMostPopular(mostPopularResponse);
+        return statistics;
     }
 
     @GetMapping(value = "/cache")
