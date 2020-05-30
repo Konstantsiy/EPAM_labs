@@ -47,9 +47,13 @@ public class Statistics {
         return min;
     }
 
+    public void setMin(Double min) {this.min = min;}
+
     public double getMax() {
         return max;
     }
+
+    public void setMax(Double max) {this.max = max;}
 
     public double getMostPopular() {
         return mostPopular;

@@ -1,13 +1,30 @@
 package com.app.models;
 
 
+import javax.persistence.*;
 import java.util.Objects;
 
+@Entity
+@Table(name = "equations_table")
 public class Equation {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
+
+    @Column(name = "first_slogan")
     private Double firstSlogan;
+
+    @Column(name = "sum")
     private Double sum;
+
+    @Column(name = "min")
     private Double min;
+
+    @Column(name = "max")
     private Double max;
+
+    public Equation(){}
 
     @Override
     public boolean equals(Object o) {
@@ -21,11 +38,19 @@ public class Equation {
     }
 
     @Override
+    public String toString() {
+        return "Equation{" +
+                "id=" + this.id +
+                ", first_slogan=" + this.firstSlogan +
+                ", sum=" + this.sum +
+                ", min=" + this.min +
+                ", max=" + this.max + "}";
+    }
+
+    @Override
     public int hashCode() {
         return Objects.hash(firstSlogan, sum, min, max);
     }
-
-    public Equation(){}
 
     public Equation(Double firstSlogan, Double sum, Double min, Double max) {
         this.firstSlogan = firstSlogan;
@@ -71,5 +96,12 @@ public class Equation {
 
     public Double getMax() {
         return max;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) { this.id = id;
     }
 }
