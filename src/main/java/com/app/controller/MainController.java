@@ -10,6 +10,7 @@ import com.app.services.EquationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -43,6 +44,7 @@ public class MainController {
         return statistics;
     }
 
+    @Async("asyncExecutor")
     @GetMapping(value = "/getEquationRoot")
     public @ResponseBody CompletableFuture<ServiceResponse> getEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
@@ -60,6 +62,7 @@ public class MainController {
         return CompletableFuture.completedFuture(this.serviceResponseRepository.findById(neededEquation.getId()));
     }
 
+    @Async("asyncExecutor")
     @PostMapping(value = "postEquationList")
     public CompletableFuture<Integer> postEquationList(@RequestBody EquationListWrapper equationListWrapper) throws InternalServiceException {
 
