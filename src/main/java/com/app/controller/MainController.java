@@ -44,9 +44,8 @@ public class MainController {
         return statistics;
     }
 
-    @Async("asyncExecutor")
     @GetMapping(value = "/getEquationRoot")
-    public @ResponseBody CompletableFuture<ServiceResponse> getEquation(@RequestBody Equation equation) throws InternalServiceException {
+    public @ResponseBody ServiceResponse getEquation(@RequestBody Equation equation) throws InternalServiceException {
         this.equationService.globalVerification(equation);
         this.requestCounter.increaseNumberOfRequests();
         Equation neededEquation = equationRepository.findByFirstSloganAndSumAndMinAndMax(
@@ -57,52 +56,55 @@ public class MainController {
             ServiceResponse response = new ServiceResponse();
             response.setEquationRoot(this.equationService.calculateEquationRoot(equation));
             serviceResponseRepository.save(response);
-            return CompletableFuture.completedFuture(response);
+            return response;
         }
-        return CompletableFuture.completedFuture(this.serviceResponseRepository.findById(neededEquation.getId()));
+        return this.serviceResponseRepository.findById(neededEquation.getId());
     }
 
     @Async("asyncExecutor")
     @PostMapping(value = "postEquationList")
     public CompletableFuture<Integer> postEquationList(@RequestBody EquationListWrapper equationListWrapper) throws InternalServiceException {
-
+        this.requestCounter.increaseNumberOfRequests();
         Statistics statistics = new Statistics();
-        statistics.setProcessId((int) equationRepository.count() + 1);
+        statistics.setProcessId(this.requestCounter.getCounter());
         statistics.setTotalCount(equationListWrapper.getEquations().size());
 
         ArrayList<ServiceResponse> validResponses = new ArrayList<>();
-        equationListWrapper.getEquations()
-                           .stream()
-                           .forEach(equation -> {
-                               if(this.equationService.globalVerification(equation)) {
-                                   statistics.incValidNumber();
-                                   ServiceResponse response = new ServiceResponse();
-                                   response.setEquationRoot(this.equationService.calculateEquationRoot(equation));
-                                   validResponses.add(response);
-                                   statistics.compare(response.getEquationRoot());
 
-                                   Equation neededEquation = equationRepository.findByFirstSloganAndSumAndMinAndMax(
-                                           equation.getFirstSlogan(), equation.getSum(), equation.getMin(), equation.getMax()
-                                   );
+        CompletableFuture.runAsync(() -> {
+            equationListWrapper.getEquations()
+                    .stream()
+                    .forEach(equation -> {
+                        if(this.equationService.globalVerification(equation)) {
+                            statistics.incValidNumber();
+                            ServiceResponse response = new ServiceResponse();
+                            response.setEquationRoot(this.equationService.calculateEquationRoot(equation));
+                            validResponses.add(response);
+                            statistics.compare(response.getEquationRoot());
 
-                                   if(neededEquation == null) {
-                                       statistics.incUniqueNumber();
-                                       equationRepository.save(equation);
-                                       serviceResponseRepository.save(response);
-                                   }
-                               }
-                           });
-        double mostPopularResponse = 0;
-        int mostPopularFreq = 0;
-        for (ServiceResponse response : validResponses) {
-            int responseFreq = Collections.frequency(validResponses, response);
-            if(responseFreq > mostPopularFreq) {
-                mostPopularFreq = responseFreq;
-                mostPopularResponse = response.getEquationRoot();
+                            Equation neededEquation = equationRepository.findByFirstSloganAndSumAndMinAndMax(
+                                    equation.getFirstSlogan(), equation.getSum(), equation.getMin(), equation.getMax()
+                            );
+
+                            if(neededEquation == null) {
+                                statistics.incUniqueNumber();
+                                equationRepository.save(equation);
+                                serviceResponseRepository.save(response);
+                            }
+                        }
+                    });
+            double mostPopularResponse = 0;
+            int mostPopularFreq = 0;
+            for (ServiceResponse response : validResponses) {
+                int responseFreq = Collections.frequency(validResponses, response);
+                if(responseFreq > mostPopularFreq) {
+                    mostPopularFreq = responseFreq;
+                    mostPopularResponse = response.getEquationRoot();
+                }
             }
-        }
-        statistics.setPopularValue(mostPopularResponse);
-        statisticsRepository.save(statistics);
+            statistics.setPopularValue(mostPopularResponse);
+            statisticsRepository.save(statistics);
+        });
         return CompletableFuture.completedFuture(statistics.getProcessId());
     }
 

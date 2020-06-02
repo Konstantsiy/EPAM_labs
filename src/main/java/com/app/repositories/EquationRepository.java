@@ -11,7 +11,5 @@ import org.springframework.stereotype.Repository;
 public interface EquationRepository extends CrudRepository<Equation, Long> {
     Iterable<Equation> findAll();
 
-    long count();
-
     Equation findByFirstSloganAndSumAndMinAndMax(Double first_slogan, Double sum, Double min, Double max);
 }
