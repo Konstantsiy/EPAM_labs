@@ -1,61 +1,117 @@
 package com.app.models;
 
+import javax.persistence.*;
 
+@Entity
+@Table(name = "statistics_table")
 public class Statistics {
-    private int count;
-    private int unique;
-    private int valid;
-    private double min;
-    private double max;
-    private double mostPopular;
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
 
-    public Statistics(int count) {
-        this.count = count;
-        this.valid = this.unique = 0;
-        this.min = this.max  = 0;
+    @Column(name = "process_id")
+    private Integer processId;
+
+    @Column(name = "total_count")
+    private Integer totalCount;
+
+    @Column(name = "unique_number")
+    private Integer uniqueNumber;
+
+    @Column(name = "valid_number")
+    private Integer validNumber;
+
+    @Column(name = "min_value")
+    private Double minValue;
+
+    @Column(name = "max_value")
+    private Double maxValue;
+
+    @Column(name = "popular_value")
+    private Double popularValue;
+
+    public Statistics(Integer processId) {
+        setMaxValue((double)0);
+        setMinValue((double)0);
+        setUniqueNumber(0);
+        setValidNumber(0);
+        setProcessId(processId);
     }
 
-    public void incValid() {this.valid++;}
-    public void incUnique() {this.unique++;}
+    public void incValidNumber() {this.validNumber++;}
+    public void incUniqueNumber() {this.uniqueNumber++;}
 
     public void compare(double value) {
-        if(value > this.max) {
-            this.max = value;
+        if(value > this.maxValue) {
+            this.maxValue = value;
         }
-        if(value < this.max) {
-            this.min = value;
+        if(value < this.minValue) {
+            this.minValue = value;
         }
     }
 
-    public void setMostPopular(double value) {
-        this.mostPopular = value;
+    public Double getMinValue() {
+        return this.minValue;
     }
 
-    public int getCount() {
-        return count;
+    public void setMinValue(Double minValue) {
+        this.minValue = minValue;
     }
 
-    public int getUnique() {
-        return unique;
+    public void setMaxValue(Double maxValue) {
+        this.maxValue = maxValue;
     }
 
-    public int getValid() {
-        return valid;
+    public Double getMaxValue() {
+        return maxValue;
     }
 
-    public double getMin() {
-        return min;
+    public Integer getProcessId() {
+        return processId;
     }
 
-    public void setMin(Double min) {this.min = min;}
-
-    public double getMax() {
-        return max;
+    public void setProcessId(Integer processId) {
+        this.processId = processId;
     }
 
-    public void setMax(Double max) {this.max = max;}
+    public Integer getTotalCount() {
+        return totalCount;
+    }
 
-    public double getMostPopular() {
-        return mostPopular;
+    public void setTotalCount(Integer totalCount) {
+        this.totalCount = totalCount;
+    }
+
+    public Integer getUniqueNumber() {
+        return uniqueNumber;
+    }
+
+    public void setUniqueNumber(Integer uniqueNumber) {
+        this.uniqueNumber = uniqueNumber;
+    }
+
+    public Integer getValidNumber() {
+        return validNumber;
+    }
+
+    public void setValidNumber(Integer validNumber) {
+        this.validNumber = validNumber;
+    }
+
+    public Double getPopularValue() {
+        return popularValue;
+    }
+
+    public void setPopularValue(Double popularValue) {
+        this.popularValue = popularValue;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getId() {
+        return id;
     }
 }
