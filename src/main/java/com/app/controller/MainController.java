@@ -61,8 +61,12 @@ public class MainController {
     }
 
     @PostMapping(value = "postEquationList")
-    public CompletableFuture<Integer> postEquationList(@RequestBody EquationListWrapper equationListWrapper) {
-        Statistics statistics = new Statistics(this.requestCounter.getCounter());
+    public CompletableFuture<Integer> postEquationList(@RequestBody EquationListWrapper equationListWrapper) throws InternalServiceException {
+
+        Statistics statistics = new Statistics();
+        statistics.setProcessId((int) equationRepository.count() + 1);
+        statistics.setTotalCount(equationListWrapper.getEquations().size());
+
         ArrayList<ServiceResponse> validResponses = new ArrayList<>();
         equationListWrapper.getEquations()
                            .stream()
@@ -96,7 +100,7 @@ public class MainController {
         }
         statistics.setPopularValue(mostPopularResponse);
         statisticsRepository.save(statistics);
-        return CompletableFuture.completedFuture(statistics.getId());
+        return CompletableFuture.completedFuture(statistics.getProcessId());
     }
 
     @GetMapping(value = "/getRequestsFromBd")

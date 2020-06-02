@@ -31,12 +31,11 @@ public class Statistics {
     @Column(name = "popular_value")
     private Double popularValue;
 
-    public Statistics(Integer processId) {
+    public Statistics() {
         setMaxValue((double)0);
         setMinValue((double)0);
         setUniqueNumber(0);
         setValidNumber(0);
-        setProcessId(processId);
     }
 
     public void incValidNumber() {this.validNumber++;}
